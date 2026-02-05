@@ -6,7 +6,7 @@ use App\Models\PdfFile;
 
 interface PdfFileRepositoryInterface
 {
-    public function generate(array $data): PdfFile;
+    public function create(array $data): PdfFile;
 
     public function findById(int $id): ?PdfFile;
 

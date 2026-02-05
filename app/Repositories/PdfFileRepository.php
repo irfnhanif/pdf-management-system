@@ -15,7 +15,7 @@ class PdfFileRepository implements PdfFileRepositoryInterface
         $this->model = $model;
     }
 
-    public function generate(array $data): PdfFile
+    public function create(array $data): PdfFile
     {
         return $this->model->create($data);
     }
