@@ -45,11 +45,11 @@
             display: table-cell;
             text-align: center;
             vertical-align: middle;
-            padding: 0 20px;
+            padding: 0 0px;
         }
 
         .institution-name {
-            font-size: 18px;
+            font-size: 26px;
             font-weight: bold;
             margin-bottom: 5px;
         }
@@ -130,17 +130,9 @@
     <footer>
         <div class="footer-content">
             <div class="page-number">
-                <script type="text/php">
-                    if (isset($pdf)) {
-                        $text = "Page {PAGE_NUM} of {PAGE_COUNT}";
-                        $font = $fontMetrics->get_font("Times-Roman", "normal");
-                        $size = 9;
-                        $pdf->text(50, 770, $text, $font, $size);
-                    }
-                </script>
             </div>
             <div class="generated-time">
-                Generated: {{ $generated_at }}
+                Dibuat: {{ $generated_at }}
             </div>
         </div>
     </footer>

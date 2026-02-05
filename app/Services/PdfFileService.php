@@ -60,8 +60,8 @@ class PdfFileService {
             'phone' => $data['phone'],
             'logo_url' => $data['logo_url'] ?? null,
             'content' => $data['content'],
-            'generated_at' => Carbon::now()->format('d F Y H:i:s'),
-            'generated_date' => Carbon::now()->format('d F Y'),
+            'generated_at' => Carbon::now()->locale('id')->translatedFormat('d F Y H:i:s'),
+            'generated_date' => Carbon::now()->locale('id')->translatedFormat('d F Y'),
         ];
     }
 
@@ -70,6 +70,13 @@ class PdfFileService {
         $pdf = Pdf::loadView('pdf.report-template', $data);
         $pdf->setPaper('A4', 'portrait');
         $pdf->setOption('isRemoteEnabled', true);
+
+        $pdf->getDomPDF()->getCanvas()->page_script(function ($pageNumber, $pageCount, $canvas, $fontMetrics) {
+            $font = $fontMetrics->getFont('Times-Roman', 'normal');
+            $size = 9;
+            $text = "Page {$pageNumber} of {$pageCount}";
+            $canvas->text(50, 790, $text, $font, $size, [0, 0, 0]);
+        });
 
         return $pdf->output();
     }
