@@ -70,13 +70,7 @@ class PdfFileService {
         $pdf = Pdf::loadView('pdf.report-template', $data);
         $pdf->setPaper('A4', 'portrait');
         $pdf->setOption('isRemoteEnabled', true);
-
-        $pdf->getDomPDF()->getCanvas()->page_script(function ($pageNumber, $pageCount, $canvas, $fontMetrics) {
-            $font = $fontMetrics->getFont('Times-Roman', 'normal');
-            $size = 9;
-            $text = "Page {$pageNumber} of {$pageCount}";
-            $canvas->text(50, 790, $text, $font, $size, [0, 0, 0]);
-        });
+        $pdf->setOption('isPhpEnabled', true);
 
         return $pdf->output();
     }

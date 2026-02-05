@@ -13,6 +13,11 @@
             font-size: 12px;
             line-height: 1.6;
             color: #333;
+            padding-top: 20px;
+        }
+
+        main {
+            width: 100%;
         }
 
         header {
@@ -55,12 +60,12 @@
         }
 
         .institution-address {
-            font-size: 10px;
+            font-size: 11px;
             margin-bottom: 2px;
         }
 
         .institution-phone {
-            font-size: 10px;
+            font-size: 11px;
         }
 
         footer {
@@ -75,39 +80,26 @@
             color: #666;
         }
 
-        .footer-content {
-            display: table;
-            width: 100%;
-        }
-
-        .page-number {
-            display: table-cell;
-            text-align: left;
-        }
-
-        .generated-time {
-            display: table-cell;
-            text-align: right;
-        }
-
         .document-title {
             text-align: center;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: bold;
-            margin-bottom: 10px;
-            margin-top: 20px;
+            margin-bottom: 5px;
+            margin-top: 10px; /* Reduced from 20px */
         }
 
         .document-date {
             text-align: center;
             font-size: 11px;
-            margin-bottom: 30px;
+            margin-bottom: 20px; /* Reduced from 30px to keep it tight */
             color: #666;
         }
 
         .content {
             text-align: justify;
             white-space: pre-wrap;
+            /* This prevents the text from hugging the footer border too closely */
+            padding-bottom: 20px;
         }
     </style>
 </head>
@@ -127,20 +119,37 @@
         </div>
     </header>
 
-    <footer>
-        <div class="footer-content">
-            <div class="page-number">
-            </div>
-            <div class="generated-time">
-                Dibuat: {{ $generated_at }}
-            </div>
-        </div>
-    </footer>
-
     <main>
-        <div class="document-title">{{ $title }}</div>
-        <div class="document-date">{{ $generated_date }}</div>
+        @if(!empty($title))
+            <div class="document-title">{{ $title }}</div>
+        @endif
+
+        @if(!empty($generated_date))
+            <div class="document-date">{{ $generated_date }}</div>
+        @endif
+
         <div class="content">{{ $content }}</div>
     </main>
+
+    <footer>
+        <div class="footer-content">
+            </div>
+    </footer>
+
+    <script type="text/php">
+        if (isset($pdf)) {
+            $text = "Page {PAGE_NUM} of {PAGE_COUNT}";
+            $font = $fontMetrics->get_font("Times New Roman", "normal");
+            $size = 9;
+            $color = array(0.4, 0.4, 0.4);
+            $word_space = 0.0;
+            $char_space = 0.0;
+            $angle = 0.0;
+
+            $pdf->page_text(50, 790, $text, $font, $size, $color, $word_space, $char_space, $angle);
+
+            $pdf->page_text(422, 790, "Dibuat: {{ $generated_at }}", $font, $size, $color, $word_space, $char_space, $angle);
+        }
+    </script>
 </body>
 </html>
