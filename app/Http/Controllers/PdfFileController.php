@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\GeneratePdfRequest;
+use App\Http\Requests\UploadPdfRequest;
 use App\Services\PdfFileService;
 use Exception;
 use Illuminate\Http\Request;
@@ -18,15 +19,25 @@ class PdfFileController extends Controller
         //
     }
 
-    public function store(Request $request)
+    public function store(UploadPdfRequest $request)
     {
-        //
+        try {
+            $result = $this->service->uploadPdf($request->validated());
+
+            return response()->json([
+                'success' => true,
+                'message' => 'PDF generated successfully',
+                'data' => $result['data']
+            ], 201);
+        } catch (Exception $e) {
+            return response()->json($e);
+        }
     }
 
     public function generate(GeneratePdfRequest $request)
     {
         try {
-            $result = $this->service->generateReport($request->validated());
+            $result = $this->service->generatePdf($request->validated());
 
             return response()->json([
                 'success' => true,

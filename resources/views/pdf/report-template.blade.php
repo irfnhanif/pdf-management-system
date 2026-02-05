@@ -85,20 +85,19 @@
             font-size: 18px;
             font-weight: bold;
             margin-bottom: 5px;
-            margin-top: 10px; /* Reduced from 20px */
+            margin-top: 10px; 
         }
 
         .document-date {
             text-align: center;
             font-size: 11px;
-            margin-bottom: 20px; /* Reduced from 30px to keep it tight */
+            margin-bottom: 20px;
             color: #666;
         }
 
         .content {
             text-align: justify;
             white-space: pre-wrap;
-            /* This prevents the text from hugging the footer border too closely */
             padding-bottom: 20px;
         }
     </style>

@@ -17,17 +17,16 @@ class PdfFileService {
         $this->repository = $repository;
     }
 
-    public function generateReport(array $data): array
+    public function generatePdf(array $data): array
     {
         try {
             $filename = $this->generateUniqueFilename();
             $pdfData = $this->preparePdfData($data);
             $pdfContent = $this->createPdf($pdfData);
             $filepath = $this->savePdfToStorage($filename, $pdfContent);
-            $pdfReport = $this->saveToDatabase([
+            $pdfReport = $this->saveGeneratedPdfToDatabase([
                 'filename' => $filename,
                 'filepath' => $filepath,
-                'title' => $data['title'],
                 'status' => 'CREATED'
             ]);
 
@@ -44,6 +43,33 @@ class PdfFileService {
         }
     }
 
+    public function uploadPdf(array $data) : array {
+        try {
+            $filename = $this->generateUniqueFilename();
+            $filepath = $this->savePdfToStorage($filename, $data['file']);
+            $pdfReport = $this->saveUploadedPdfToDatabase([
+                'filename' => $filename,
+                'original_name' => $data['file']->getClientOriginalName(),
+                'filepath' => $filepath,
+                'size' => Storage::disk('public')->size('pdf/' . $filename),
+                'status' => 'UPLOADED'
+            ]);
+
+            return [
+                "success" => true,
+                "data" => $pdfReport
+            ];
+        } catch (Exception $e) {
+            if (isset($filename)) {
+                $this->cleanupFile($filename);
+            }
+
+            throw new Exception('Failed to upload PDF: ' . $e->getMessage());
+        }
+    }
+
+
+    // ======================= INTERNAL HELPER METHODS =======================
     protected function generateUniqueFilename(): string
     {
         $timestamp = Carbon::now()->format('Ymd_His');
@@ -75,15 +101,26 @@ class PdfFileService {
         return $pdf->output();
     }
 
-    protected function savePdfToStorage(string $filename, string $content): string
+    protected function savePdfToStorage(string $filename, mixed $content): string
     {
         $filepath = 'pdf/' . $filename;
-        Storage::disk('public')->put($filepath, $content);
+
+        if ($content instanceof \Illuminate\Http\UploadedFile) {
+            $content->storeAs('pdf', $filename, 'public');
+        } else {
+            Storage::disk('public')->put($filepath, $content);
+        }
+
+        if ($content instanceof \Illuminate\Http\UploadedFile) {
+            $content->storeAs('pdf', $filename, 'public');
+        } else {
+            Storage::disk('public')->put($filepath, $content);
+        }
 
         return '/storage/' . $filepath;
     }
 
-    protected function saveToDatabase(array $data): object
+    protected function saveGeneratedPdfToDatabase(array $data): object
     {
         $pdfReport = $this->repository->create($data);
 
@@ -91,6 +128,21 @@ class PdfFileService {
             'id' => $pdfReport->id,
             'filename' => $pdfReport->filename,
             'filepath' => $pdfReport->filepath,
+            'status' => $pdfReport->status,
+            'created_at' => $pdfReport->created_at->toIso8601String()
+        ];
+    }
+
+    protected function saveUploadedPdfToDatabase(array $data): object
+    {
+        $pdfReport = $this->repository->create($data);
+
+        return (object) [
+            'id' => $pdfReport->id,
+            'original_name' => $pdfReport->original_name,
+            'filename' => $pdfReport->filename,
+            'filepath' => $pdfReport->filepath,
+            'size' => $pdfReport->size,
             'status' => $pdfReport->status,
             'created_at' => $pdfReport->created_at->toIso8601String()
         ];
