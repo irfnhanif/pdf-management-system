@@ -15,6 +15,17 @@ class PdfFileRepository implements PdfFileRepositoryInterface
         $this->model = $model;
     }
 
+    public function getAll(int $limit = 10, string $status = ''): LengthAwarePaginator
+    {
+        $query = $this->model->query();
+
+        if (!empty($status)) {
+            $query = $query->where('status', $status);
+        }
+
+        return $query->latest()->paginate($limit);
+    }
+
     public function create(array $data): PdfFile
     {
         return $this->model->create($data);
@@ -25,7 +36,18 @@ class PdfFileRepository implements PdfFileRepositoryInterface
         return $this->model->find($id);
     }
 
-    public function delete(int $id): bool
+    public function updateStatus(int $id, string $status): bool
+    {
+        $report = $this->findById($id);
+
+        if (!$report) {
+            return false;
+        }
+
+        return $report->update(['status' => $status]);
+    }
+
+    public function softDelete(int $id): bool
     {
         $file = $this->findById($id);
 
@@ -33,17 +55,9 @@ class PdfFileRepository implements PdfFileRepositoryInterface
             return false;
         }
 
-        return $file->delete();
-    }
-
-    public function getAll(int $limit = 10, string $status = ''): LengthAwarePaginator
-    {
-        $query = $this->model->query();
-
-        if (!empty($status)) {
-            $query = $query->where('status', $status);
-        }
-
-        return $query->latest()->paginate($limit);
+        return $file->update([
+            'status' => 'DELETED',
+            'deleted_at' => now()
+        ]);
     }
 }
