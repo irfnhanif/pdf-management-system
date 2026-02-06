@@ -51,8 +51,8 @@ class UploadPdfRequest extends FormRequest
 
     protected function mapValidationErrorToCode($errors): string
     {
-        if ($errors->has('file_upload')) {
-            $firstError = $errors->first('file_upload');
+        if ($errors->has('file')) {
+            $firstError = $errors->first('file');
 
             if (str_contains($firstError, 'mandatory') || str_contains($firstError, 'required')) {
                 return 'FILE_REQUIRED';
