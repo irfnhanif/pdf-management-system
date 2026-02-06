@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\PdfFile;
 use App\Repositories\PdfFileRepository;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -9,7 +10,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Exception;
 
-class PdfFileService {
+class PdfFileService
+{
     protected PdfFileRepository $repository;
 
     public function __construct(PdfFileRepository $repository)
@@ -24,7 +26,7 @@ class PdfFileService {
             $pdfData = $this->preparePdfData($data);
             $pdfContent = $this->createPdf($pdfData);
             $filepath = $this->savePdfToStorage($filename, $pdfContent);
-            $pdfReport = $this->saveGeneratedPdfToDatabase([
+            $pdfReport = $this->savePdfToDatabase([
                 'filename' => $filename,
                 'filepath' => $filepath,
                 'status' => 'CREATED'
@@ -32,7 +34,13 @@ class PdfFileService {
 
             return [
                 'success' => true,
-                'data' => $pdfReport
+                'data' => [
+                    'id' => $pdfReport->id,
+                    'filename' => $pdfReport->filename,
+                    'filepath' => $pdfReport->filepath,
+                    'status' => $pdfReport->status,
+                    'created_at' => $pdfReport->created_at->toIso8601String()
+                ]
             ];
         } catch (Exception $e) {
             if (isset($filename)) {
@@ -43,11 +51,12 @@ class PdfFileService {
         }
     }
 
-    public function uploadPdf(array $data) : array {
+    public function uploadPdf(array $data): array
+    {
         try {
             $filename = $this->generateUniqueFilename();
             $filepath = $this->savePdfToStorage($filename, $data['file']);
-            $pdfReport = $this->saveUploadedPdfToDatabase([
+            $pdfReport = $this->savePdfToDatabase([
                 'filename' => $filename,
                 'original_name' => $data['file']->getClientOriginalName(),
                 'filepath' => $filepath,
@@ -57,7 +66,15 @@ class PdfFileService {
 
             return [
                 "success" => true,
-                "data" => $pdfReport
+                "data" => [
+                    'id' => $pdfReport->id,
+                    'original_name' => $pdfReport->original_name,
+                    'filename' => $pdfReport->filename,
+                    'filepath' => $pdfReport->filepath,
+                    'size' => $pdfReport->size,
+                    'status' => $pdfReport->status,
+                    'created_at' => $pdfReport->created_at->toIso8601String()
+                ]
             ];
         } catch (Exception $e) {
             if (isset($filename)) {
@@ -111,41 +128,14 @@ class PdfFileService {
             Storage::disk('public')->put($filepath, $content);
         }
 
-        if ($content instanceof \Illuminate\Http\UploadedFile) {
-            $content->storeAs('pdf', $filename, 'public');
-        } else {
-            Storage::disk('public')->put($filepath, $content);
-        }
-
         return '/storage/' . $filepath;
     }
 
-    protected function saveGeneratedPdfToDatabase(array $data): object
+    protected function savePdfToDatabase(array $data): PdfFile
     {
         $pdfReport = $this->repository->create($data);
 
-        return (object) [
-            'id' => $pdfReport->id,
-            'filename' => $pdfReport->filename,
-            'filepath' => $pdfReport->filepath,
-            'status' => $pdfReport->status,
-            'created_at' => $pdfReport->created_at->toIso8601String()
-        ];
-    }
-
-    protected function saveUploadedPdfToDatabase(array $data): object
-    {
-        $pdfReport = $this->repository->create($data);
-
-        return (object) [
-            'id' => $pdfReport->id,
-            'original_name' => $pdfReport->original_name,
-            'filename' => $pdfReport->filename,
-            'filepath' => $pdfReport->filepath,
-            'size' => $pdfReport->size,
-            'status' => $pdfReport->status,
-            'created_at' => $pdfReport->created_at->toIso8601String()
-        ];
+        return $pdfReport;
     }
 
     protected function cleanupFile(string $filename): void
