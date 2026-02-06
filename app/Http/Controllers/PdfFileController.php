@@ -30,7 +30,16 @@ class PdfFileController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => $paginatedResult->items(),
+                'data' => collect($paginatedResult->items())->map(function (object $pdf) {
+                    return [
+                        'id' => $pdf->id,
+                        'filename' => $pdf->filename,
+                        'original_name' => $pdf->original_name,
+                        'size' => $pdf->size,
+                        'status' => $pdf->status,
+                        'created_at' => $pdf->created_at->toIso8601String()
+                    ];
+                })->toArray(),
                 'pagination' => [
                     'page' => (int) $request->query('page', 1),
                     'limit' => (int) $limit,
@@ -53,7 +62,7 @@ class PdfFileController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'PDF generated successfully',
+                'message' => 'PDF uploaded successfully',
                 'data' => $result['data']
             ], 201);
         } catch (Exception $e) {
@@ -87,7 +96,7 @@ class PdfFileController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'PDF generated successfully',
+                'message' => 'PDF deleted successfully',
                 'data' => $result['data']
             ]);
         } catch (Exception $e) {

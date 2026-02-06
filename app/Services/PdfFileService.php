@@ -30,6 +30,7 @@ class PdfFileService
             $pdfFile = $this->savePdfToDatabase([
                 'filename' => $filename,
                 'filepath' => $filepath,
+                'size' => Storage::disk('public')->size('pdf/' . $filename),
                 'status' => 'CREATED'
             ]);
 
