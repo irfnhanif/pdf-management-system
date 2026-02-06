@@ -82,6 +82,38 @@ class PdfFileController extends Controller
 
     public function destroy(string $id)
     {
-        //
+        try {
+            $result = $this->service->deletePdf($id);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'PDF generated successfully',
+                'data' => $result['data']
+            ]);
+        } catch (Exception $e) {
+            $message = $e->getMessage();
+            $errorStatusCode = 500;
+
+            if (str_contains($message, 'not found')) {
+                $errorStatusCode = 404;
+                $message = 'PDF file not found';
+            } elseif (str_contains($message, 'already deleted')) {
+                $errorStatusCode = 422;
+                $message = 'PDF file is already deleted';
+            } else {
+                $message = 'Failed to delete PDF';
+            }
+
+            $response = [
+                'success' => false,
+                'message' => $message
+            ];
+
+            if ($errorStatusCode == 500) {
+                $response['errors'] = $e->getMessage();
+            }
+
+            throw new HttpResponseException(response()->json($response, $errorStatusCode));
+        }
     }
 }

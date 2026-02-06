@@ -27,20 +27,19 @@ class PdfFileService
             $pdfData = $this->preparePdfData($data);
             $pdfContent = $this->createPdf($pdfData);
             $filepath = $this->savePdfToStorage($filename, $pdfContent);
-            $pdfReport = $this->savePdfToDatabase([
+            $pdfFile = $this->savePdfToDatabase([
                 'filename' => $filename,
                 'filepath' => $filepath,
                 'status' => 'CREATED'
             ]);
 
             return [
-                'success' => true,
                 'data' => [
-                    'id' => $pdfReport->id,
-                    'filename' => $pdfReport->filename,
-                    'filepath' => $pdfReport->filepath,
-                    'status' => $pdfReport->status,
-                    'created_at' => $pdfReport->created_at->toIso8601String()
+                    'id' => $pdfFile->id,
+                    'filename' => $pdfFile->filename,
+                    'filepath' => $pdfFile->filepath,
+                    'status' => $pdfFile->status,
+                    'created_at' => $pdfFile->created_at->toIso8601String()
                 ]
             ];
         } catch (Exception $e) {
@@ -57,7 +56,7 @@ class PdfFileService
         try {
             $filename = $this->generateUniqueFilename();
             $filepath = $this->savePdfToStorage($filename, $data['file']);
-            $pdfReport = $this->savePdfToDatabase([
+            $pdfFile = $this->savePdfToDatabase([
                 'filename' => $filename,
                 'original_name' => $data['file']->getClientOriginalName(),
                 'filepath' => $filepath,
@@ -66,15 +65,14 @@ class PdfFileService
             ]);
 
             return [
-                "success" => true,
                 "data" => [
-                    'id' => $pdfReport->id,
-                    'original_name' => $pdfReport->original_name,
-                    'filename' => $pdfReport->filename,
-                    'filepath' => $pdfReport->filepath,
-                    'size' => $pdfReport->size,
-                    'status' => $pdfReport->status,
-                    'created_at' => $pdfReport->created_at->toIso8601String()
+                    'id' => $pdfFile->id,
+                    'original_name' => $pdfFile->original_name,
+                    'filename' => $pdfFile->filename,
+                    'filepath' => $pdfFile->filepath,
+                    'size' => $pdfFile->size,
+                    'status' => $pdfFile->status,
+                    'created_at' => $pdfFile->created_at->toIso8601String()
                 ]
             ];
         } catch (Exception $e) {
@@ -86,9 +84,40 @@ class PdfFileService
         }
     }
 
-    public function getPdfFiles(int $limit, string $status): LengthAwarePaginator {
+    public function getPdfFiles(int $limit, string $status): LengthAwarePaginator
+    {
         try {
             return $this->repository->getAll($limit, $status);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    public function deletePdf(string $id): array
+    {
+        try {
+            $pdfFile = $this->repository->findById($id);
+
+            if (!$pdfFile) {
+                throw new Exception("PDF file not found");
+            }
+
+            if ($pdfFile->status === 'DELETED') {
+                throw new Exception("PDF file is already deleted");
+            }
+
+            $this->repository->softDelete($id);
+
+            $pdfFile->refresh();
+
+            return [
+                "data" => [
+                    'id' => $pdfFile->id,
+                    'filename' => $pdfFile->filename,
+                    'status' => $pdfFile->status,
+                    'deleted_at' => $pdfFile->deleted_at->toIso8601String()
+                ]
+            ];
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
@@ -142,9 +171,9 @@ class PdfFileService
 
     protected function savePdfToDatabase(array $data): PdfFile
     {
-        $pdfReport = $this->repository->create($data);
+        $pdfFile = $this->repository->create($data);
 
-        return $pdfReport;
+        return $pdfFile;
     }
 
     protected function cleanupFile(string $filename): void
