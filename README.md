@@ -1,59 +1,119 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# PDF Management System (Headless API)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Deskripsi Project
 
-## About Laravel
+PDF Management System adalah aplikasi **Headless API** yang dibangun menggunakan framework **Laravel 12**. Sistem ini dirancang khusus untuk menangani pengelolaan dokumen dan pembuatan laporan PDF.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Proyek ini dibangun dengan menerapkan **Strict Layered Architecture** (Controller, Service, dan Repository) untuk memastikan kode tetap **bersih (clean)**, **mudah dibaca (readable)**, dan mematuhi prinsip **best practices** dalam pengembangan perangkat lunak (SOLID Principles). Pemisahan tanggung jawab (Separation of Concerns) ini memudahkan pengujian dan pemeliharaan jangka panjang.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Meskipun merupakan Headless API, proyek ini menggunakan satu template **Blade** khusus untuk keperluan pembuatan laporan PDF menggunakan library DOMPDF. Template ini dibuat menggunakan HTML/CSS.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Tech Stack
 
-## Learning Laravel
+Teknologi utama yang digunakan dalam pengembangan proyek ini meliputi:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+**Backend:**
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- **PHP** (^8.2)
+- **Laravel Framework** (^12.0)
+- **Laravel Sanctum** (Autentikasi API)
+- **barryvdh/laravel-dompdf** (Pembuatan file PDF)
 
-## Laravel Sponsors
+**Database:**
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- **PostgreSQL** (Default Database)
 
-### Premium Partners
+**Templating (PDF Only):**
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+- **Blade Templates** (Raw HTML/CSS untuk layout laporan)
 
-## Contributing
+**Tools:**
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+- **Composer** (Dependency manager)
 
-## Code of Conduct
+## Cara Instalasi
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Ikuti langkah-langkah berikut untuk menginstal proyek di lingkungan lokal Anda:
 
-## Security Vulnerabilities
+### Prasyarat
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Pastikan Anda telah menginstal:
 
-## License
+- PHP >= 8.2
+- Composer
+- PostgreSQL Database
+- Node.js & NPM (untuk build script dasar)
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Langkah Instalasi
+
+1. **Clone repository**
+
+   ```bash
+   git clone https://github.com/irfnhanif/pdf-management-system.git
+   cd pdf-management-system
+   ```
+
+2. **Jalankan Setup Otomatis**
+   Perintah ini akan menginstal dependensi, menyalin file `.env`, dan generate key.
+
+   ```bash
+   composer run setup
+   ```
+
+3. **Konfigurasi Database**
+   Buka file `.env` yang baru dibuat, dan sesuaikan konfigurasi database untuk menggunakan **PostgreSQL**:
+
+   ```env
+   DB_CONNECTION=pgsql
+   DB_HOST=127.0.0.1
+   DB_PORT=5432
+   DB_DATABASE=nama_database_anda
+   DB_USERNAME=username_postgres_anda
+   DB_PASSWORD=password_postgres_anda
+   ```
+
+4. **Migrasi Database**
+   Setelah konfigurasi `.env` sesuai, jalankan migrasi:
+   ```bash
+   php artisan migrate
+   ```
+
+## Cara Menjalankan Project
+
+Untuk menjalankan aplikasi di lingkungan lokal, gunakan perintah berikut:
+
+```bash
+composer run dev
+```
+
+Perintah ini akan menjalankan server lokal Laravel dan proses background yang diperlukan secara bersamaan. API akan dapat diakses melalui `http://localhost:8000`.
+
+## Struktur Folder & Arsitektur
+
+Proyek ini menggunakan **Strict Layered Architecture** untuk memisahkan logika bisnis dari penanganan request HTTP. Berikut adalah struktur folder utamanya:
+
+```
+pdf-management-system/
+├── app/
+│   ├── Http/
+│   │   └── Controllers/    # Layer 1: Menerima input, validasi, dan memanggil Service
+│   ├── Services/           # Layer 2: Berisi logika bisnis (Business Logic) utama
+│   ├── Repositories/       # Layer 3: Abstraksi query database (Data Access Layer)
+│   └── Models/             # Representasi data (Eloquent ORM)
+├── bootstrap/              # Skrip startup framework
+├── config/                 # File konfigurasi aplikasi
+├── database/               # Migrasi schema PostgreSQL, factories, dan seeders
+├── resources/
+│   └── views/              # Template Blade (Khusus untuk layout PDF)
+├── routes/                 # Definisi routing API (api.php)
+├── storage/                # Penyimpanan file PDF yang dihasilkan
+├── .env.example            # Contoh konfigurasi environment
+├── composer.json           # Definisi dependensi PHP
+└── README.md               # Dokumentasi proyek
+```
+
+### Penjelasan Arsitektur
+
+1.  **Controller**: Hanya bertugas menerima request HTTP, memvalidasi input, memanggil method di _Service_, dan mengembalikan respon JSON (Response Formatting). Controller tidak boleh mengandung logika bisnis yang kompleks atau query database langsung.
+2.  **Service**: Tempat di mana logika bisnis utama berada. Service menerima data dari Controller, melakukan pemrosesan, dan berinteraksi dengan _Repository_ jika membutuhkan data.
+3.  **Repository**: Bertanggung jawab penuh atas akses data ke database. Service tidak boleh memanggil Model Eloquent secara langsung, melainkan harus melalui Repository.
