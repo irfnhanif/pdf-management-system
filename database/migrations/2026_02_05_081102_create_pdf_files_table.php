@@ -19,8 +19,7 @@ return new class extends Migration
             $table->bigInteger('size')->nullable();
             $table->enum('status', ['CREATED', 'UPLOADED', 'DELETED']);
             $table->timestamps();
-            $table->softDeletesDatetime();
-
+            $table->timestamp('deleted_at')->nullable();
 
             $table->index('status', 'idx_status');
         });

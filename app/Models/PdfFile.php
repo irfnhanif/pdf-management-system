@@ -12,6 +12,7 @@ class PdfFile extends Model
         'filepath',
         'size',
         'status',
+        'deleted_at'
     ];
 
     protected $casts = [
