@@ -4,7 +4,7 @@ namespace App\Repositories;
 
 use App\Models\PdfFile;
 use App\Repositories\Contracts\PdfFileRepositoryInterface;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class PdfFileRepository implements PdfFileRepositoryInterface
 {
@@ -36,8 +36,14 @@ class PdfFileRepository implements PdfFileRepositoryInterface
         return $file->delete();
     }
 
-    public function getAll(int $limit = 10)
+    public function getAll(int $limit = 10, string $status = ''): LengthAwarePaginator
     {
-        return $this->model->latest()->paginate($limit);
+        $query = $this->model->query();
+
+        if (!empty($status)) {
+            $query = $query->where('status', $status);
+        }
+
+        return $query->latest()->paginate($limit);
     }
 }

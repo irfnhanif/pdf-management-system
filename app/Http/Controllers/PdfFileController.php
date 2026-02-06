@@ -6,6 +6,7 @@ use App\Http\Requests\GeneratePdfRequest;
 use App\Http\Requests\UploadPdfRequest;
 use App\Services\PdfFileService;
 use Exception;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 
 class PdfFileController extends Controller
@@ -14,9 +15,35 @@ class PdfFileController extends Controller
         protected PdfFileService $service
     ) {}
 
-    public function index()
+    public function index(Request $request)
     {
-        //
+        try {
+            $status = $request->query('status', '');
+            if (!in_array($status, ['CREATED', 'UPLOADED', 'DELETED'])) {
+                $status = '';
+            }
+
+            $limit = $request->query('limit', 10);
+            $limit = min($limit, 100);
+
+            $paginatedResult = $this->service->getPdfFiles($limit, $status);
+
+            return response()->json([
+                'success' => true,
+                'data' => $paginatedResult->items(),
+                'pagination' => [
+                    'page' => (int) $request->query('page', 1),
+                    'limit' => (int) $limit,
+                    'total' => $paginatedResult->total()
+                ]
+            ]);
+        } catch (Exception $e) {
+            throw new HttpResponseException(response()->json([
+                'success' => false,
+                'message' => 'Internal server error',
+                'errors' => $e->getMessage()
+            ], 500));
+        }
     }
 
     public function store(UploadPdfRequest $request)

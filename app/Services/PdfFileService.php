@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Exception;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class PdfFileService
 {
@@ -82,6 +83,14 @@ class PdfFileService
             }
 
             throw new Exception('Failed to upload PDF: ' . $e->getMessage());
+        }
+    }
+
+    public function getPdfFiles(int $limit, string $status): LengthAwarePaginator {
+        try {
+            return $this->repository->getAll($limit, $status);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
         }
     }
 
